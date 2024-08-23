@@ -59,6 +59,8 @@ if ([string]::IsNullOrEmpty($env:AZD_PREPDOCS_RAN) -or $env:AZD_PREPDOCS_RAN -eq
     "--searchindex $($env:AZURE_SEARCH_INDEX) " +
     "--formrecognizerendpoint $($env:AZURE_FORMRECOGNIZER_SERVICE_ENDPOINT) " +
     "--tenantid $($env:AZURE_TENANT_ID) " +
+    "--removeAll $($env:PRE_DOCS_REMOVE_ALL)" +
+    "--remove $($env:PRE_DOCS_REMOVE)" +
     "--verbose"
 
     if ($env:AZURE_COMPUTERVISION_SERVICE_ENDPOINT -and $env:USE_VISION) {

@@ -4,6 +4,12 @@
       "commandName": "Project",
       "commandLineArgs": "--port 7037",
       "launchBrowser": false
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "publishAllPorts": true
     }
   }
 }

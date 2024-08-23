@@ -149,6 +149,7 @@ internal static class WebApplicationExtensions
         var result = await client.GetImageGenerationsAsync(new ImageGenerationOptions
         {
             Prompt = prompt.Prompt,
+            DeploymentName = "dall-e-2"
         },
         cancellationToken);
 

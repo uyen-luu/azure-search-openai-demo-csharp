@@ -4,32 +4,41 @@ param tags object = {}
 
 param allowedOrigins array = []
 param applicationInsightsName string = ''
-param appServicePlanId string
+param managedEnvironmentId string
 @secure()
 param appSettings object = {}
 param keyVaultName string
-param serviceName string = 'function'
+param serviceName string = 'func'
 param storageAccountName string
+param kind string = 'functionapp,linux,container,azurecontainerapps'
+param linuxFxVersion string
+@description('Specifies if the resource exists')
+param exists bool
+param containerRegistryName string
+@description('The OpenAI Embedding deployment name')
 
-module function '../core/host/functions.bicep' = {
-  name: '${serviceName}-function'
+module function '../core/host/functions-upsert.bicep' = {
+  name: 'ca-${serviceName}'
   params: {
     name: name
     location: location
     tags: union(tags, { 'azd-service-name': serviceName })
     allowedOrigins: allowedOrigins
-    alwaysOn: false
     appSettings: appSettings
     applicationInsightsName: applicationInsightsName
-    appServicePlanId: appServicePlanId
+    managedEnvironmentId: managedEnvironmentId
     keyVaultName: keyVaultName
     runtimeName: 'dotnet-isolated'
     runtimeVersion: '8.0'
     storageAccountName: storageAccountName
-    scmDoBuildDuringDeployment: false
+    linuxFxVersion: linuxFxVersion
+    kind: kind
+    exists: exists
+    containerRegistryName: containerRegistryName
   }
 }
 
 output SERVICE_FUNCTION_IDENTITY_PRINCIPAL_ID string = function.outputs.identityPrincipalId
 output SERVICE_FUNCTION_NAME string = function.outputs.name
 output SERVICE_FUNCTION_URI string = function.outputs.uri
+output SERVICE_FUNCTION__IMAGE_NAME string = function.outputs.linuxFxVersion

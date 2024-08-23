@@ -103,6 +103,9 @@
     },
     "azureOpenAIChatGptDeploymentCapacity": {
       "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT_CAPACITY=30}"
+    },
+    "funcAppExists": {
+      "value": "${SERVICE_FUNCTION_RESOURCE_EXISTS=false}"
     }
   }
 }

@@ -25,6 +25,8 @@ if [ -z "$AZD_PREPDOCS_RAN" ] || [ "$AZD_PREPDOCS_RAN" = "false" ]; then
       --searchendpoint "$AZURE_SEARCH_SERVICE_ENDPOINT" \
       --searchindex "$AZURE_SEARCH_INDEX" \
       --formrecognizerendpoint "$AZURE_FORMRECOGNIZER_SERVICE_ENDPOINT" \
+      --removeAll "$PRE_DOCS_REMOVE_ALL" \
+      --remove "$PRE_DOCS_REMOVE" \
       --tenantid "$AZURE_TENANT_ID""
 
     # if USE_VISION and AZURE_COMPUTERVISION_SERVICE_ENDPOINT is set, add --computervisionendpoint "$AZURE_COMPUTERVISION_SERVICE_ENDPOINT" to the command above

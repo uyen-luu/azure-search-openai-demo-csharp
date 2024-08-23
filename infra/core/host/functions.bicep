@@ -5,14 +5,21 @@ param tags object = {}
 
 // Reference Properties
 param applicationInsightsName string = ''
-param appServicePlanId string
+param managedEnvironmentId string
 param keyVaultName string = ''
 param managedIdentity bool = !empty(keyVaultName)
 param storageAccountName string
 
 // Runtime Properties
 @allowed([
-  'dotnet', 'dotnetcore', 'dotnet-isolated', 'node', 'python', 'java', 'powershell', 'custom'
+  'dotnet'
+  'dotnetcore'
+  'dotnet-isolated'
+  'node'
+  'python'
+  'java'
+  'powershell'
+  'custom'
 ])
 param runtimeName string
 param runtimeNameAndVersion string = '${runtimeName}|${runtimeVersion}'
@@ -20,12 +27,15 @@ param runtimeVersion string
 
 // Function Settings
 @allowed([
-  '~4', '~3', '~2', '~1'
+  '~4'
+  '~3'
+  '~2'
+  '~1'
 ])
 param extensionVersion string = '~4'
 
 // Microsoft.Web/sites Properties
-param kind string = 'functionapp,linux'
+param kind string = 'functionapp,linux,container,azurecontainerapps'
 
 // Microsoft.Web/sites/config
 param allowedOrigins array = []
@@ -53,19 +63,21 @@ module functions 'appservice.bicep' = {
     alwaysOn: alwaysOn
     appCommandLine: appCommandLine
     applicationInsightsName: applicationInsightsName
-    appServicePlanId: appServicePlanId
+    managedEnvironmentId: managedEnvironmentId
     appSettings: union(appSettings, {
-        AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
-        FUNCTIONS_EXTENSION_VERSION: extensionVersion
-        FUNCTIONS_WORKER_RUNTIME: runtimeName
-      })
+      AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+      FUNCTIONS_EXTENSION_VERSION: extensionVersion
+      FUNCTIONS_WORKER_RUNTIME: runtimeName
+    })
     clientAffinityEnabled: clientAffinityEnabled
     enableOryxBuild: enableOryxBuild
     functionAppScaleLimit: functionAppScaleLimit
     healthCheckPath: healthCheckPath
     keyVaultName: keyVaultName
     kind: kind
-    linuxFxVersion: linuxFxVersion
+    linuxFxVersion: !empty(linuxFxVersion)
+      ? linuxFxVersion
+      : 'Docker|mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0'
     managedIdentity: managedIdentity
     minimumElasticInstanceCount: minimumElasticInstanceCount
     numberOfWorkers: numberOfWorkers
@@ -84,3 +96,4 @@ resource storage 'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
 output identityPrincipalId string = managedIdentity ? functions.outputs.identityPrincipalId : ''
 output name string = functions.outputs.name
 output uri string = functions.outputs.uri
+output linuxFxVersion string = functions.outputs.linuxFxVersion

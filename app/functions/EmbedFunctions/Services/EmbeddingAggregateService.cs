@@ -10,9 +10,10 @@ public sealed class EmbeddingAggregateService(
 {
     internal async Task EmbedBlobAsync(Stream blobStream, string blobName)
     {
+        var embeddingType = GetEmbeddingType();
+        var status = DocumentProcessingStatus.NotProcessed;
         try
         {
-            var embeddingType = GetEmbeddingType();
             var embedService = embedServiceFactory.GetEmbedService(embeddingType);
 
             if (Path.GetExtension(blobName) is ".png" or ".jpg" or ".jpeg" or ".gif")
@@ -22,34 +23,22 @@ public sealed class EmbeddingAggregateService(
                 var blobClient = contentContainer.GetBlobClient(blobName);
                 var uri = blobClient.Uri.AbsoluteUri ?? throw new InvalidOperationException("Blob URI is null.");
                 var result = await embedService.EmbedImageBlobAsync(blobStream, uri, blobName);
-                var status = result switch
+                status = result switch
                 {
                     true => DocumentProcessingStatus.Succeeded,
                     _ => DocumentProcessingStatus.Failed
                 };
-
-                await corpusClient.SetMetadataAsync(new Dictionary<string, string>
-                {
-                    [nameof(DocumentProcessingStatus)] = status.ToString(),
-                    [nameof(EmbeddingType)] = embeddingType.ToString()
-                });
             }
             else if (Path.GetExtension(blobName) is ".pdf")
             {
                 logger.LogInformation("Embedding pdf: {Name}", blobName);
                 var result = await embedService.EmbedPDFBlobAsync(blobStream, blobName);
 
-                var status = result switch
+                status = result switch
                 {
                     true => DocumentProcessingStatus.Succeeded,
                     _ => DocumentProcessingStatus.Failed
                 };
-
-                await corpusClient.SetMetadataAsync(new Dictionary<string, string>
-                {
-                    [nameof(DocumentProcessingStatus)] = status.ToString(),
-                    [nameof(EmbeddingType)] = embeddingType.ToString()
-                });
             }
             else
             {
@@ -59,7 +48,16 @@ public sealed class EmbeddingAggregateService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to embed: {Name}, error: {Message}", blobName, ex.Message);
+            status = DocumentProcessingStatus.Failed;
             throw;
+        }
+        finally
+        {
+            await corpusClient.SetMetadataAsync(new Dictionary<string, string>
+            {
+                [nameof(DocumentProcessingStatus)] = status.ToString(),
+                [nameof(EmbeddingType)] = embeddingType.ToString()
+            });
         }
     }
 

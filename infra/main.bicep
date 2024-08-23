@@ -6,12 +6,39 @@ targetScope = 'subscription'
 param environmentName string
 
 @description('Primary location for all resources')
-@allowed([ 'centralus', 'eastus2', 'eastasia', 'westus', 'westeurope', 'westus2', 'australiaeast', 'eastus', 'francecentral', 'japaneast', 'nortcentralus', 'swedencentral', 'switzerlandnorth', 'uksouth' ])
+@allowed([
+  'centralus'
+  'eastus2'
+  'eastasia'
+  'westus'
+  'westeurope'
+  'westus2'
+  'australiaeast'
+  'eastus'
+  'francecentral'
+  'japaneast'
+  'nortcentralus'
+  'swedencentral'
+  'switzerlandnorth'
+  'uksouth'
+])
 param location string
 param tags string = ''
 
 @description('Location for the OpenAI resource group')
-@allowed([ 'canadaeast', 'westus', 'eastus', 'eastus2', 'francecentral', 'swedencentral', 'switzerlandnorth', 'uksouth', 'japaneast', 'northcentralus', 'australiaeast' ])
+@allowed([
+  'canadaeast'
+  'westus'
+  'eastus'
+  'eastus2'
+  'francecentral'
+  'swedencentral'
+  'switzerlandnorth'
+  'uksouth'
+  'japaneast'
+  'northcentralus'
+  'australiaeast'
+])
 @metadata({
   azd: {
     type: 'location'
@@ -20,19 +47,16 @@ param tags string = ''
 param openAiResourceGroupLocation string
 
 @description('Name of the chat GPT model. Default: gpt-35-turbo')
-@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-4o', 'gpt-35-turbo-16k', 'gpt-4-16k' ])
+@allowed(['gpt-35-turbo', 'gpt-4', 'gpt-4o', 'gpt-35-turbo-16k', 'gpt-4-16k'])
 param azureOpenAIChatGptModelName string = 'gpt-35-turbo'
 
-param azureOpenAIChatGptModelVersion string ='0613'
+param azureOpenAIChatGptModelVersion string = '0613'
 
 @description('Name of the Azure Application Insights dashboard')
 param applicationInsightsDashboardName string = ''
 
 @description('Name of the Azure Application Insights resource')
 param applicationInsightsName string = ''
-
-@description('Name of the Azure App Service Plan')
-param appServicePlanName string = ''
 
 @description('Capacity of the chat GPT deployment. Default: 1')
 param chatGptDeploymentCapacity int = 1
@@ -144,6 +168,7 @@ param storageResourceGroupName string = ''
 
 @description('Specifies if the web app exists')
 param webAppExists bool = false
+param funcAppExists bool = false
 
 @description('Name of the web app container')
 param webContainerAppName string = ''
@@ -153,6 +178,9 @@ param webIdentityName string = ''
 
 @description('Name of the web app image')
 param webImageName string = ''
+
+@description('Name of the func app image')
+param funcLinuxFxVersion string = ''
 
 @description('Use Azure OpenAI service')
 param useAOAI bool
@@ -174,7 +202,6 @@ var resourceToken = toLower(uniqueString(subscription().id, environmentName, loc
 
 var baseTags = { 'azd-env-name': environmentName }
 var updatedTags = union(empty(tags) ? {} : base64ToJson(tags), baseTags)
-
 
 // Organize resources in a resource group
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -225,65 +252,71 @@ module keyVaultSecrets 'core/security/keyvault-secrets.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.name
     tags: updatedTags
-    secrets: concat([
-      {
-        name: 'AzureSearchServiceEndpoint'
-        value: searchService.outputs.endpoint
-      }
-      {
-        name: 'AzureSearchIndex'
-        value: searchIndexName
-      }
-      {
-        name: 'AzureStorageAccountEndpoint'
-        value: storage.outputs.primaryEndpoints.blob
-      }
-      {
-        name: 'AzureStorageContainer'
-        value: storageContainerName
-      }
-      {
-        name: 'UseAOAI'
-        value: useAOAI ? 'true' : 'false'
-      }
-      {
-        name: 'UseVision'
-        value: useVision ? 'true' : 'false'
-      }
-    ],
-    useAOAI ? [
-      {
-        name: 'AzureOpenAiServiceEndpoint'
-        value: azureOpenAi.outputs.endpoint
-      }
-      {
-        name: 'AzureOpenAiChatGptDeployment'
-        value: azureChatGptDeploymentName
-      }
-      {
-        name: 'AzureOpenAiEmbeddingDeployment'
-        value: azureEmbeddingDeploymentName
-      }
-    ] : [
-      {
-        name: 'OpenAIAPIKey'
-        value: openAIApiKey
-      }
-      {
-        name: 'OpenAiChatGptDeployment'
-        value: openAiChatGptDeployment
-      }
-      {
-        name: 'OpenAiEmbeddingDeployment'
-        value: openAiEmbeddingDeployment
-      }
-    ],
-    useVision ? [
-      {
-        name: 'AzureComputerVisionServiceEndpoint'
-        value: computerVision.outputs.endpoint
-      }
-    ] : [])
+    secrets: concat(
+      [
+        {
+          name: 'AzureSearchServiceEndpoint'
+          value: searchService.outputs.endpoint
+        }
+        {
+          name: 'AzureSearchIndex'
+          value: searchIndexName
+        }
+        {
+          name: 'AzureStorageAccountEndpoint'
+          value: storage.outputs.primaryEndpoints.blob
+        }
+        {
+          name: 'AzureStorageContainer'
+          value: storageContainerName
+        }
+        {
+          name: 'UseAOAI'
+          value: useAOAI ? 'true' : 'false'
+        }
+        {
+          name: 'UseVision'
+          value: useVision ? 'true' : 'false'
+        }
+      ],
+      useAOAI
+        ? [
+            {
+              name: 'AzureOpenAiServiceEndpoint'
+              value: azureOpenAi.outputs.endpoint
+            }
+            {
+              name: 'AzureOpenAiChatGptDeployment'
+              value: azureChatGptDeploymentName
+            }
+            {
+              name: 'AzureOpenAiEmbeddingDeployment'
+              value: azureEmbeddingDeploymentName
+            }
+          ]
+        : [
+            {
+              name: 'OpenAIAPIKey'
+              value: openAIApiKey
+            }
+            {
+              name: 'OpenAiChatGptDeployment'
+              value: openAiChatGptDeployment
+            }
+            {
+              name: 'OpenAiEmbeddingDeployment'
+              value: openAiEmbeddingDeployment
+            }
+          ],
+      useVision
+        ? [
+            {
+              name: 'AzureComputerVisionServiceEndpoint'
+              value: computerVision.outputs.endpoint
+            }
+          ]
+        : []
+    )
   }
 }
 
@@ -293,11 +326,18 @@ module containerApps 'core/host/container-apps.bicep' = {
   scope: resourceGroup
   params: {
     name: 'app'
-    containerAppsEnvironmentName: !empty(containerAppsEnvironmentName) ? containerAppsEnvironmentName : '${abbrs.appManagedEnvironments}${resourceToken}'
-    containerRegistryName: !empty(containerRegistryName) ? containerRegistryName : '${abbrs.containerRegistryRegistries}${resourceToken}'
-    containerRegistryResourceGroupName: !empty(containerRegistryResourceGroupName) ? containerRegistryResourceGroupName : resourceGroup.name
+    containerAppsEnvironmentName: !empty(containerAppsEnvironmentName)
+      ? containerAppsEnvironmentName
+      : '${abbrs.appManagedEnvironments}${resourceToken}'
+    containerRegistryName: !empty(containerRegistryName)
+      ? containerRegistryName
+      : '${abbrs.containerRegistryRegistries}${resourceToken}'
+    containerRegistryResourceGroupName: !empty(containerRegistryResourceGroupName)
+      ? containerRegistryResourceGroupName
+      : resourceGroup.name
     location: location
     logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
+    containerRegistryAdminUserEnabled: true
   }
 }
 
@@ -310,7 +350,9 @@ module web './app/web.bicep' = {
     location: location
     tags: updatedTags
     imageName: webImageName
-    identityName: !empty(webIdentityName) ? webIdentityName : '${abbrs.managedIdentityUserAssignedIdentities}web-${resourceToken}'
+    identityName: !empty(webIdentityName)
+      ? webIdentityName
+      : '${abbrs.managedIdentityUserAssignedIdentities}web-${resourceToken}'
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
@@ -332,47 +374,32 @@ module web './app/web.bicep' = {
   }
 }
 
-// Create an App Service Plan to group applications under the same payment plan and SKU
-module appServicePlan './core/host/appserviceplan.bicep' = {
-  name: 'appserviceplan'
-  scope: resourceGroup
-  params: {
-    name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceToken}'
-    location: location
-    tags: updatedTags
-    sku: {
-      name: 'Y1'
-      tier: 'Dynamic'
-    }
-  }
-}
-
 // The application backend
 module function './app/function.bicep' = {
-  name: 'function'
+  name: 'func-deploy'
   scope: resourceGroup
   params: {
-    name: !empty(functionServiceName) ? functionServiceName : '${abbrs.webSitesFunctions}function-${resourceToken}'
+    name: !empty(functionServiceName) ? functionServiceName : '${abbrs.webSitesFunctions}embedding-${resourceToken}'
     location: location
     tags: updatedTags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
-    appServicePlanId: appServicePlan.outputs.id
+    managedEnvironmentId: containerApps.outputs.environmentId
     keyVaultName: keyVault.outputs.name
     storageAccountName: storage.outputs.name
-    allowedOrigins: [ web.outputs.SERVICE_WEB_URI ]
+    allowedOrigins: [web.outputs.SERVICE_WEB_URI]
     appSettings: {
       AZURE_FORMRECOGNIZER_SERVICE_ENDPOINT: formRecognizer.outputs.endpoint
       AZURE_SEARCH_SERVICE_ENDPOINT: searchService.outputs.endpoint
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_STORAGE_BLOB_ENDPOINT: storage.outputs.primaryEndpoints.blob
       AZURE_OPENAI_EMBEDDING_DEPLOYMENT: useAOAI ? azureEmbeddingDeploymentName : ''
-      OPENAI_EMBEDDING_DEPLOYMENT: useAOAI ? '' : openAiEmbeddingDeployment
       AZURE_OPENAI_ENDPOINT: useAOAI ? azureOpenAi.outputs.endpoint : ''
       USE_VISION: string(useVision)
       USE_AOAI: string(useAOAI)
-      AZURE_COMPUTER_VISION_ENDPOINT: useVision ? computerVision.outputs.endpoint : ''
-      OPENAI_API_KEY: useAOAI ? '' : openAIApiKey
     }
+    linuxFxVersion: funcLinuxFxVersion
+    exists: funcAppExists
+    containerRegistryName: containerApps.outputs.registryName
   }
 }
 
@@ -384,9 +411,15 @@ module monitoring 'core/monitor/monitoring.bicep' = {
     location: location
     tags: updatedTags
     includeApplicationInsights: true
-    logAnalyticsName: !empty(logAnalyticsName) ? logAnalyticsName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
-    applicationInsightsName: !empty(applicationInsightsName) ? applicationInsightsName : '${abbrs.insightsComponents}${resourceToken}'
-    applicationInsightsDashboardName: !empty(applicationInsightsDashboardName) ? applicationInsightsDashboardName : '${abbrs.portalDashboards}${resourceToken}'
+    logAnalyticsName: !empty(logAnalyticsName)
+      ? logAnalyticsName
+      : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
+    applicationInsightsName: !empty(applicationInsightsName)
+      ? applicationInsightsName
+      : '${abbrs.insightsComponents}${resourceToken}'
+    applicationInsightsDashboardName: !empty(applicationInsightsDashboardName)
+      ? applicationInsightsDashboardName
+      : '${abbrs.portalDashboards}${resourceToken}'
   }
 }
 
@@ -400,47 +433,51 @@ module azureOpenAi 'core/ai/cognitiveservices.bicep' = if (useAOAI) {
     sku: {
       name: openAiSkuName
     }
-    deployments: concat([
-      
-      {
-        name: azureEmbeddingDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: azureEmbeddingModelName
-          version: '2'
+    deployments: concat(
+      [
+        {
+          name: azureEmbeddingDeploymentName
+          model: {
+            format: 'OpenAI'
+            name: azureEmbeddingModelName
+            version: '2'
+          }
+          sku: {
+            name: 'Standard'
+            capacity: embeddingDeploymentCapacity
+          }
         }
-        sku: {
-          name: 'Standard'
-          capacity: embeddingDeploymentCapacity
-        }
-      }
-    ], useVision ? [
-      {
-        name: azureChatGptDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: azureOpenAIChatGptModelName
-          version: '2024-05-13'
-        }
-        sku: {
-          name: 'Standard'
-          capacity: chatGptDeploymentCapacity
-        }
-      }
-    ] : [
-      {
-        name: azureChatGptDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: azureOpenAIChatGptModelName
-          version: azureOpenAIChatGptModelVersion
-        }
-        sku: {
-          name: 'Standard'
-          capacity: chatGptDeploymentCapacity
-        }
-      }
-    ])
+      ],
+      useVision
+        ? [
+            {
+              name: azureChatGptDeploymentName
+              model: {
+                format: 'OpenAI'
+                name: azureOpenAIChatGptModelName
+                version: '2024-05-13'
+              }
+              sku: {
+                name: 'Standard'
+                capacity: chatGptDeploymentCapacity
+              }
+            }
+          ]
+        : [
+            {
+              name: azureChatGptDeploymentName
+              model: {
+                format: 'OpenAI'
+                name: azureOpenAIChatGptModelName
+                version: azureOpenAIChatGptModelVersion
+              }
+              sku: {
+                name: 'Standard'
+                capacity: chatGptDeploymentCapacity
+              }
+            }
+          ]
+    )
   }
 }
 
@@ -449,7 +486,9 @@ module computerVision 'core/ai/cognitiveservices.bicep' = if (useVision) {
   name: 'computerVision'
   scope: computerVisionResourceGroup
   params: {
-    name: !empty(computerVisionServiceName) ? computerVisionServiceName : '${abbrs.cognitiveServicesComputerVision}${resourceToken}'
+    name: !empty(computerVisionServiceName)
+      ? computerVisionServiceName
+      : '${abbrs.cognitiveServicesComputerVision}${resourceToken}'
     kind: 'ComputerVision'
     location: computerVisionResourceGroupLocation
     tags: updatedTags
@@ -463,7 +502,9 @@ module formRecognizer 'core/ai/cognitiveservices.bicep' = {
   name: 'formrecognizer'
   scope: formRecognizerResourceGroup
   params: {
-    name: !empty(formRecognizerServiceName) ? formRecognizerServiceName : '${abbrs.cognitiveServicesFormRecognizer}${resourceToken}'
+    name: !empty(formRecognizerServiceName)
+      ? formRecognizerServiceName
+      : '${abbrs.cognitiveServicesFormRecognizer}${resourceToken}'
     kind: 'FormRecognizer'
     location: formRecognizerResourceGroupLocation
     tags: updatedTags
@@ -748,7 +789,7 @@ output AZURE_LOCATION string = location
 output AZURE_OPENAI_RESOURCE_LOCATION string = openAiResourceGroupLocation
 output AZURE_OPENAI_CHATGPT_DEPLOYMENT string = azureChatGptDeploymentName
 output AZURE_OPENAI_EMBEDDING_DEPLOYMENT string = azureEmbeddingDeploymentName
-output AZURE_OPENAI_ENDPOINT string = useAOAI? azureOpenAi.outputs.endpoint : ''
+output AZURE_OPENAI_ENDPOINT string = useAOAI ? azureOpenAi.outputs.endpoint : ''
 output AZURE_OPENAI_RESOURCE_GROUP string = useAOAI ? azureOpenAiResourceGroup.name : ''
 output AZURE_OPENAI_SERVICE string = useAOAI ? azureOpenAi.outputs.name : ''
 output AZURE_RESOURCE_GROUP string = resourceGroup.name

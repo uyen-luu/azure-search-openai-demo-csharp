@@ -11,10 +11,14 @@ services:
     docker:
       path: ../Dockerfile
       context: ../
-  function:
-    project: ./app/functions/EmbedFunctions
-    host: function
+
+  func:
+    project: ./app/functions/EmbedFunctions/
+    host: containerapp
     language: dotnet
+    docker:
+      path: ../../func.Dockerfile
+      context: ../../
 hooks:
   postprovision:
     windows:
