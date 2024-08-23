@@ -105,7 +105,7 @@ internal static class WebApplicationExtensions
         BlobContainerClient client,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        await foreach (var blob in client.GetBlobsAsync(cancellationToken: cancellationToken))
+        await foreach (var blob in client.GetBlobsAsync(BlobTraits.Metadata, cancellationToken: cancellationToken))
         {
             if (blob is not null and { Deleted: false })
             {
@@ -149,6 +149,7 @@ internal static class WebApplicationExtensions
         var result = await client.GetImageGenerationsAsync(new ImageGenerationOptions
         {
             Prompt = prompt.Prompt,
+            DeploymentName = "dall-e-2"
         },
         cancellationToken);
 

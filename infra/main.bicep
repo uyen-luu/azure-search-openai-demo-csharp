@@ -349,10 +349,10 @@ module appServicePlan './core/host/appserviceplan.bicep' = {
 
 // The application backend
 module function './app/function.bicep' = {
-  name: 'function'
+  name: 'func-deploy'
   scope: resourceGroup
   params: {
-    name: !empty(functionServiceName) ? functionServiceName : '${abbrs.webSitesFunctions}function-${resourceToken}'
+    name: !empty(functionServiceName) ? functionServiceName : '${abbrs.webSitesFunctions}embedding-${resourceToken}'
     location: location
     tags: updatedTags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
