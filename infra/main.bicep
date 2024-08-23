@@ -34,8 +34,8 @@ param applicationInsightsName string = ''
 @description('Name of the Azure App Service Plan')
 param appServicePlanName string = ''
 
-@description('Capacity of the chat GPT deployment. Default: 10')
-param chatGptDeploymentCapacity int = 10
+@description('Capacity of the chat GPT deployment. Default: 1')
+param chatGptDeploymentCapacity int = 1
 
 @description('Name of the chat GPT deployment')
 param azureChatGptDeploymentName string = 'chat'
