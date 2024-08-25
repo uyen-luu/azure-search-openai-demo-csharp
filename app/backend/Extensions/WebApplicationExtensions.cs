@@ -45,20 +45,21 @@ internal static class WebApplicationExtensions
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var deploymentId = config["AZURE_OPENAI_CHATGPT_DEPLOYMENT"];
+        var chatName = "**IPS 📎 OpenDay Assistant**";
         var response = await client.GetChatCompletionsStreamingAsync(
             new ChatCompletionsOptions
             {
                 DeploymentName = deploymentId,
                 Messages =
                 {
-                    new ChatRequestSystemMessage("""
+                    new ChatRequestSystemMessage($"""
                         You're an AI assistant for developers, helping them write code more efficiently.
-                        You're name is **Blazor 📎 Clippy** and you're an expert Blazor developer.
-                        You're also an expert in ASP.NET Core, C#, TypeScript, and even JavaScript.
+                        You're name is {chatName} and you're an expert Blazor developer.
+                        You're also an expert in Azure Services, Azure Open AI Services, ASP.NET Core, C#, TypeScript, and even JavaScript.
                         You will always reply with a Markdown formatted response.
                         """),
                     new ChatRequestUserMessage("What's your name?"),
-                    new ChatRequestAssistantMessage("Hi, my name is **Blazor 📎 Clippy**! Nice to meet you."),
+                    new ChatRequestAssistantMessage($"Hi, my name is {chatName}! Nice to meet you."),
                     new ChatRequestUserMessage(prompt.Prompt)
                 }
             }, cancellationToken);
