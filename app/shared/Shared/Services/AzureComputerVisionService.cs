@@ -12,7 +12,7 @@ public class AzureComputerVisionService(HttpClient client, string endPoint, Toke
     // add virtual keyword to make it mockable
     public async Task<ImageEmbeddingResponse> VectorizeImageAsync(string imagePathOrUrl, CancellationToken ct = default)
     {
-        var api = $"{endPoint}/computervision/retrieval:vectorizeImage?api-version=2023-02-01-preview&modelVersion=latest";
+        var api = $"{endPoint}/computervision/retrieval:vectorizeImage?api-version=2023-04-01-preview&modelVersion=latest";
         var token = await tokenCredential.GetTokenAsync(new TokenRequestContext(new[] { "https://cognitiveservices.azure.com/.default" }), ct);
         // first try to read as local file
         if (File.Exists(imagePathOrUrl))
@@ -66,7 +66,7 @@ public class AzureComputerVisionService(HttpClient client, string endPoint, Toke
 
     public virtual async Task<ImageEmbeddingResponse> VectorizeTextAsync(string text, CancellationToken ct = default)
     {
-        var api = $"{endPoint}/computervision/retrieval:vectorizeText?api-version=2023-02-01-preview&modelVersion=latest";
+        var api = $"{endPoint}/computervision/retrieval:vectorizeText?api-version=2023-04-01-preview&modelVersion=latest";
 
         var token = await tokenCredential.GetTokenAsync(new TokenRequestContext(new[] { "https://cognitiveservices.azure.com/.default" }), ct);
         using var request = new HttpRequestMessage(HttpMethod.Post, api);
