@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using Shared.Extensions;
+
 namespace MinimalApi.Extensions;
 
 internal static class WebApplicationExtensions
@@ -115,9 +117,9 @@ internal static class WebApplicationExtensions
                 builder.Path += $"/{blob.Name}";
 
                 var metadata = blob.Metadata;
-                var documentProcessingStatus = GetMetadataEnumOrDefault<DocumentProcessingStatus>(
+                var documentProcessingStatus = BlobExtension.GetMetadataEnumOrDefault<DocumentProcessingStatus>(
                     metadata, nameof(DocumentProcessingStatus), DocumentProcessingStatus.NotProcessed);
-                var embeddingType = GetMetadataEnumOrDefault<EmbeddingType>(
+                var embeddingType = BlobExtension.GetMetadataEnumOrDefault<EmbeddingType>(
                     metadata, nameof(EmbeddingType), EmbeddingType.AzureSearch);
 
                 yield return new(
@@ -128,14 +130,6 @@ internal static class WebApplicationExtensions
                     builder.Uri,
                     documentProcessingStatus,
                     embeddingType);
-
-                static TEnum GetMetadataEnumOrDefault<TEnum>(
-                    IDictionary<string, string> metadata,
-                    string key,
-                    TEnum @default) where TEnum : struct => metadata.TryGetValue(key, out var value)
-                        && Enum.TryParse<TEnum>(value, out var status)
-                            ? status
-                            : @default;
             }
         }
     }

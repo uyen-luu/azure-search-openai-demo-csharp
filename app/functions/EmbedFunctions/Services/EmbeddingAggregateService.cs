@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using Shared.Extensions;
+
 namespace EmbedFunctions.Services;
 
 public sealed class EmbeddingAggregateService(
@@ -11,10 +13,19 @@ public sealed class EmbeddingAggregateService(
     internal async Task EmbedBlobAsync(Stream blobStream, string blobName)
     {
         var embeddingType = GetEmbeddingType();
-        var status = DocumentProcessingStatus.NotProcessed;
         var contentContainer = blobServiceClient.GetBlobContainerClient("content");
         var blobClient = contentContainer.GetBlobClient(blobName);
         var uri = blobClient.Uri.AbsoluteUri ?? throw new InvalidOperationException("Blob URI is null.");
+        var props = await blobClient.GetPropertiesAsync().ConfigureAwait(false);
+        var metadata = props.Value.Metadata;
+        var currentStatus = BlobExtension.GetMetadataEnumOrDefault<DocumentProcessingStatus>(
+                   metadata, nameof(DocumentProcessingStatus), DocumentProcessingStatus.NotProcessed);
+
+        if (currentStatus == DocumentProcessingStatus.Succeeded)
+        {
+            return;
+        }
+        var status = DocumentProcessingStatus.NotProcessed;
         try
         {
             var embedService = embedServiceFactory.GetEmbedService(embeddingType);
@@ -55,11 +66,14 @@ public sealed class EmbeddingAggregateService(
         }
         finally
         {
-            await blobClient.SetMetadataAsync(new Dictionary<string, string>
+            if (currentStatus != status)
             {
-                [nameof(DocumentProcessingStatus)] = status.ToString(),
-                [nameof(EmbeddingType)] = embeddingType.ToString()
-            });
+                await blobClient.SetMetadataAsync(new Dictionary<string, string>
+                {
+                    [nameof(DocumentProcessingStatus)] = status.ToString(),
+                    [nameof(EmbeddingType)] = embeddingType.ToString()
+                });
+            }
         }
     }
 
