@@ -17,7 +17,7 @@ internal static class WebApplicationExtensions
         api.MapPost("chat", OnPostChatAsync);
 
         // Upload a document
-        api.MapPost("documents", OnPostDocumentAsync);
+        api.MapPost("documents", OnPostDocumentAsync).DisableAntiforgery();
 
         // Get all documents
         api.MapGet("documents", OnGetDocumentsAsync);
