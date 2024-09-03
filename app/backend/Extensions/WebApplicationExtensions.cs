@@ -75,7 +75,7 @@ internal static class WebApplicationExtensions
 
     private static async Task<IResult> OnPostChatAsync(
         ChatRequest request,
-        ReadRetrieveReadChatService chatService,
+        RagOchestratorService chatService,
         CancellationToken cancellationToken)
     {
         if (request is { History.Length: > 0 })
