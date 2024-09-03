@@ -4,6 +4,7 @@ using Azure.Core;
 using Copilot.Service.Extensions;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Shared.Services;
 
 namespace MinimalApi.Services;
 #pragma warning disable SKEXP0011 // Mark members as static

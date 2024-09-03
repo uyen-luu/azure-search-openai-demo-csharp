@@ -2,6 +2,7 @@
 
 using Shared;
 using Shared.Models;
+using Shared.Services;
 
 s_rootCommand.SetHandler(
     async (context) =>
@@ -191,7 +192,7 @@ static async ValueTask UploadBlobsAndCreateIndexAsync(
                 // revert stream position
                 stream.Position = 0;
 
-                await embeddingService.EmbedPDFBlobAsync(stream, documentName);
+                await embeddingService.EmbedPdfBlobAsync(stream, documentName);
                 status = DocumentProcessingStatus.Succeeded;
             }
             catch
@@ -222,7 +223,7 @@ static async ValueTask UploadBlobsAndCreateIndexAsync(
     else
     {
         var blobName = BlobNameFromFilePage(fileName);
-        await UploadBlobAsync(fileName, blobName, container, url => embeddingService.EmbedPDFBlobAsync(File.OpenRead(fileName), blobName));
+        await UploadBlobAsync(fileName, blobName, container, url => embeddingService.EmbedPdfBlobAsync(File.OpenRead(fileName), blobName));
     }
 }
 

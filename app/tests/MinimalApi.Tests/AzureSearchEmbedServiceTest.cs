@@ -1,22 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Azure;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Azure.AI.OpenAI;
 using Azure.Identity;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Indexes;
-using Azure.Search.Documents.Models;
 using Azure.Storage.Blobs;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Shared.Services;
 
 namespace MinimalApi.Tests;
 public class AzureSearchEmbedServiceTest
@@ -230,14 +223,14 @@ public class AzureSearchEmbedServiceTest
             var benefitOptionsPDFName = "Benefit_Options.pdf";
             var benefitOptionsPDFPath = Path.Combine("data", benefitOptionsPDFName);
             using var stream = File.OpenRead(benefitOptionsPDFPath);
-            var isSucceed = await service.EmbedPDFBlobAsync(stream, benefitOptionsPDFName);
+            var isSucceed = await service.EmbedPdfBlobAsync(stream, benefitOptionsPDFName);
             isSucceed.Should().BeTrue();
 
             // check if the document page is uploaded to blob
             var blobs = containerClient.GetBlobsAsync();
             var blobNames = blobs.Select(b => b.Name).ToListAsync();
             blobNames.Result.Count.Should().Be(4);
-            blobNames.Result.Should().BeEquivalentTo([ "Benefit_Options-0.txt", "Benefit_Options-1.txt", "Benefit_Options-2.txt", "Benefit_Options-3.txt" ]);
+            blobNames.Result.Should().BeEquivalentTo(["Benefit_Options-0.txt", "Benefit_Options-1.txt", "Benefit_Options-2.txt", "Benefit_Options-3.txt"]);
         }
         finally
         {
@@ -303,7 +296,7 @@ public class AzureSearchEmbedServiceTest
             var blobs = containerClient.GetBlobsAsync();
             var blobNames = blobs.Select(b => b.Name).ToListAsync();
             blobNames.Result.Count.Should().Be(1);
-            blobNames.Result.Should().BeEquivalentTo([ imageBlobName ]);
+            blobNames.Result.Should().BeEquivalentTo([imageBlobName]);
         }
         finally
         {

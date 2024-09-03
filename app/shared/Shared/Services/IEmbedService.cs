@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+namespace Shared.Services;
 public interface IEmbedService
 {
     /// <summary>
@@ -11,7 +12,7 @@ public interface IEmbedService
     /// An asynchronous operation that yields <c>true</c>
     /// when successfully embedded, otherwise <c>false</c>.
     /// </returns>
-    Task<bool> EmbedPDFBlobAsync(
+    Task<bool> EmbedPdfBlobAsync(
         Stream blobStream,
         string blobName);
 
