@@ -10,18 +10,18 @@ using Microsoft.Extensions.Logging;
 using Shared.Models;
 
 namespace Shared.Extensions;
-internal static class AzureDocumentExtension
+internal static class AzureDataAnalysisExtension
 {
     private const int MaxSectionLength = 1_000;
     private const int SentenceSearchLimit = 100;
     private const int SectionOverlap = 100;
-    private static char[] s_sentenceEndings = ['.', '!', '?'];
-    private static char[] s_wordBreaks = [',', ';', ':', ' ', '(', ')', '[', ']', '{', '}', '\t', '\n'];
-    public static async Task<IReadOnlyList<PageDetail>> GetDocumentTextAsync(this DocumentAnalysisClient client,
-                                                                             Stream blobStream,
-                                                                             string blobName,
-                                                                             ILogger? logger = null,
-                                                                             CancellationToken ct = default)
+    private readonly static char[] s_sentenceEndings = ['.', '!', '?'];
+    private readonly static char[] s_wordBreaks = [',', ';', ':', ' ', '(', ')', '[', ']', '{', '}', '\t', '\n'];
+    public static async Task<IReadOnlyList<PageDetail>> AnalyzeDocumentPagesAsync(this DocumentAnalysisClient client,
+                                                                                  Stream blobStream,
+                                                                                  string blobName,
+                                                                                  ILogger? logger = null,
+                                                                                  CancellationToken ct = default)
     {
         logger?.LogInformation(
             "Extracting text from '{Blob}' using Azure Form Recognizer", blobName);
@@ -45,10 +45,10 @@ internal static class AzureDocumentExtension
         return pageMap.AsReadOnly();
     }
 
-    public static IEnumerable<Section> CreateSections(this IReadOnlyList<PageDetail> pageMap,
-                                                      string blobName,
-                                                      Regex matchInSetRegex,
-                                                      ILogger? logger = null)
+    public static IEnumerable<Section> CreateDocsSections(this IReadOnlyList<PageDetail> pageMap,
+                                                          string blobName,
+                                                          Regex matchInSetRegex,
+                                                          ILogger? logger = null)
     {
         var allText = string.Concat(pageMap.Select(p => p.Text))!;
         var length = allText.Length;
@@ -106,8 +106,20 @@ internal static class AzureDocumentExtension
     }
 
 
+    public static Section CreateImageSection(string imageUrl,
+                                             string imageName,
+                                             Regex matchInSetRegex)
+    {
+        return new Section(
+            Id: matchInSetRegex.Replace(imageUrl, "_").TrimStart('_'),   // id can only contain letters, digits, underscore (_), dash (-), or equal sign (=).
+            Content: imageName,
+            Category: "image",
+            SourcePage: imageUrl,
+            SourceFile: imageUrl);
+    }
 
-    public static IndexDocumentsAction<SearchDocument> CreateIndex(this Section section, float[]? embedding)
+
+    public static IndexDocumentsAction<SearchDocument> CreateDocsIndexAction(this Section section, float[]? embedding)
     {
         return new IndexDocumentsAction<SearchDocument>(
                 IndexActionType.MergeOrUpload,
@@ -121,6 +133,21 @@ internal static class AzureDocumentExtension
                     ["embedding"] = embedding,
                 });
     }
+
+    public static IndexDocumentsAction<SearchDocument> CreateImageIndexAction(this Section section, float[]? embedding)
+    {
+        return new IndexDocumentsAction<SearchDocument>(
+                IndexActionType.MergeOrUpload,
+                new SearchDocument
+                {
+                    ["id"] = section.Id,
+                    ["content"] = section.Content,
+                    ["category"] = section.Category,
+                    ["sourcefile"] = section.SourceFile,
+                    ["imageEmbedding"] = embedding,
+                });
+    }
+
     #region Privates
     private static PageDetail GetPageDetail(this Response<AnalyzeResult> results, IReadOnlyList<DocumentPage> pages, int i, int offset)
     {
