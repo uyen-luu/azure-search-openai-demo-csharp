@@ -28,7 +28,6 @@ public sealed partial class AzureSearchEmbedService(
 {
     [GeneratedRegex("[^0-9a-zA-Z_-]")]
     private static partial Regex MatchInSetRegex();
-    private static (string ConfigName, string Profile, int DocsDimensions) s_vectorSearch = ("my-vector-config", "my-vector-profile", 1536);
     private readonly AzureSearchIndexFactory _indexFactory = new(computerVisionService, includeImageEmbeddingsField);
 
     public async Task<bool> EmbedPdfBlobAsync(Stream pdfBlobStream, string blobName)

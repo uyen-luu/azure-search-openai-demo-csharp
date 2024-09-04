@@ -12,7 +12,7 @@ internal class DocumentQueryBuilder
     {
         var top = overrides?.Top ?? 3;
         var exclude_category = overrides?.ExcludeCategory;
-        var filter = exclude_category == null ? string.Empty : $"category ne '{exclude_category}'";
+        var filter = exclude_category == null ? string.Empty : $"{DemoConstants.SimpleFields.Category} ne '{exclude_category}'";
         var useSemanticRanker = overrides?.SemanticRanker ?? false;
         var useSemanticCaptions = overrides?.SemanticCaptions ?? false;
 
@@ -23,10 +23,8 @@ internal class DocumentQueryBuilder
                 QueryType = SearchQueryType.Semantic,
                 SemanticSearch = new()
                 {
-                    SemanticConfigurationName = "default",
-                    QueryCaption = new(useSemanticCaptions
-                        ? QueryCaptionType.Extractive
-                        : QueryCaptionType.None),
+                    SemanticConfigurationName = DemoConstants.Semantic.ConfigName,
+                    QueryCaption = new(useSemanticCaptions ? QueryCaptionType.Extractive : QueryCaptionType.None),
                 },
                 // TODO: Find if these options are assignable
                 //QueryLanguage = "en-us",
@@ -48,7 +46,7 @@ internal class DocumentQueryBuilder
                 // candidates for semantic reranking
                 KNearestNeighborsCount = useSemanticRanker ? 50 : top,
             };
-            vectorQuery.Fields.Add("embedding");
+            vectorQuery.Fields.Add(DemoConstants.EmbeddingFields.Docs);
             searchOptions.VectorSearch = new();
             searchOptions.VectorSearch.Queries.Add(vectorQuery);
         }
@@ -59,7 +57,7 @@ internal class DocumentQueryBuilder
     {
         var top = overrides?.Top ?? 3;
         var exclude_category = overrides?.ExcludeCategory;
-        var filter = exclude_category == null ? string.Empty : $"category ne '{exclude_category}'";
+        var filter = exclude_category == null ? string.Empty : $"{DemoConstants.SimpleFields.Category} ne '{exclude_category}'";
 
         var searchOptions = new SearchOptions
         {
@@ -73,7 +71,7 @@ internal class DocumentQueryBuilder
             {
                 KNearestNeighborsCount = top,
             };
-            vectorQuery.Fields.Add("imageEmbedding");
+            vectorQuery.Fields.Add(DemoConstants.EmbeddingFields.Images);
             searchOptions.VectorSearch = new();
             searchOptions.VectorSearch.Queries.Add(vectorQuery);
         }

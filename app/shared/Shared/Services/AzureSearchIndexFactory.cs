@@ -5,8 +5,6 @@ using Azure.Search.Documents.Indexes.Models;
 namespace Shared.Services;
 internal class AzureSearchIndexFactory
 {
-    private static (string ConfigName, string Profile, int DocsDimensions, int? ImageDimensions)
-        s_vectorSearch = ("my-vector-config", "my-vector-profile", 1536, null);
     public AzureSearchIndexFactory(IComputerVisionService? computerVisionService = null, bool includeImageEmbeddingsField = false)
     {
         if (includeImageEmbeddingsField && computerVisionService is null)
@@ -15,7 +13,7 @@ internal class AzureSearchIndexFactory
         }
         else
         {
-            s_vectorSearch.ImageDimensions = computerVisionService!.Dimension;
+            DemoConstants.VectorSearch.ImageDimensions = computerVisionService!.Dimension;
         }
     }
     public SearchIndex CreateIndex(string name)
@@ -32,19 +30,19 @@ internal class AzureSearchIndexFactory
 
     private VectorSearch CreateVector() => new()
     {
-        Algorithms = { new HnswAlgorithmConfiguration(s_vectorSearch.ConfigName) },
-        Profiles = { new VectorSearchProfile(s_vectorSearch.Profile, s_vectorSearch.ConfigName) }
+        Algorithms = { new HnswAlgorithmConfiguration(DemoConstants.VectorSearch.ConfigName) },
+        Profiles = { new VectorSearchProfile(DemoConstants.VectorSearch.Profile, DemoConstants.VectorSearch.ConfigName) }
     };
 
     private SemanticSearch CreateSemantic() => new()
     {
         Configurations =
         {
-            new SemanticConfiguration("default", new()
+            new SemanticConfiguration(DemoConstants.Semantic.ConfigName, new()
             {
                 ContentFields =
                 {
-                    new SemanticField("content")
+                    new SemanticField(DemoConstants.Semantic.SearchableField)
                 }
             })
         }
@@ -53,26 +51,26 @@ internal class AzureSearchIndexFactory
     private IList<SearchField> CreateFields()
     {
         IList<SearchField> fields = [
-            new SimpleField("id", SearchFieldDataType.String) { IsKey = true },
-            new SearchableField("content") { AnalyzerName = LexicalAnalyzerName.EnMicrosoft },
-            new SimpleField("category", SearchFieldDataType.String) { IsFacetable = true },
-            new SimpleField("sourcepage", SearchFieldDataType.String) { IsFacetable = true },
-            new SimpleField("sourcefile", SearchFieldDataType.String) { IsFacetable = true },
-            new SearchField("embedding", SearchFieldDataType.Collection(SearchFieldDataType.Single))
+            new SimpleField(DemoConstants.SimpleFields.Id, SearchFieldDataType.String) { IsKey = true },
+            new SearchableField(DemoConstants.Semantic.SearchableField) { AnalyzerName = LexicalAnalyzerName.EnMicrosoft },
+            new SimpleField(DemoConstants.SimpleFields.Category, SearchFieldDataType.String) { IsFacetable = true },
+            new SimpleField(DemoConstants.SimpleFields.SourcePage, SearchFieldDataType.String) { IsFacetable = true },
+            new SimpleField(DemoConstants.SimpleFields.SourceFile, SearchFieldDataType.String) { IsFacetable = true },
+            new SearchField(DemoConstants.EmbeddingFields.Docs, SearchFieldDataType.Collection(SearchFieldDataType.Single))
                 {
-                    VectorSearchDimensions = s_vectorSearch.DocsDimensions,
+                    VectorSearchDimensions =  DemoConstants.VectorSearch.DocsDimensions,
                     IsSearchable = true,
-                    VectorSearchProfileName = s_vectorSearch.Profile,
+                    VectorSearchProfileName =  DemoConstants.VectorSearch.Profile,
                 }
             ];
 
-        if (s_vectorSearch.ImageDimensions.HasValue)
+        if (DemoConstants.VectorSearch.ImageDimensions.HasValue)
         {
-            fields.Add(new SearchField("imageEmbedding", SearchFieldDataType.Collection(SearchFieldDataType.Single))
+            fields.Add(new SearchField(DemoConstants.EmbeddingFields.Images, SearchFieldDataType.Collection(SearchFieldDataType.Single))
             {
-                VectorSearchDimensions = s_vectorSearch.ImageDimensions.Value,
+                VectorSearchDimensions = DemoConstants.VectorSearch.ImageDimensions.Value,
                 IsSearchable = true,
-                VectorSearchProfileName = s_vectorSearch.Profile,
+                VectorSearchProfileName = DemoConstants.VectorSearch.Profile,
             });
         }
 

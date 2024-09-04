@@ -113,7 +113,7 @@ internal static class AzureDataAnalysisExtension
         return new Section(
             Id: matchInSetRegex.Replace(imageUrl, "_").TrimStart('_'),   // id can only contain letters, digits, underscore (_), dash (-), or equal sign (=).
             Content: imageName,
-            Category: "image",
+            Category: DemoConstants.Category.Images,
             SourcePage: imageUrl,
             SourceFile: imageUrl);
     }
@@ -125,12 +125,12 @@ internal static class AzureDataAnalysisExtension
                 IndexActionType.MergeOrUpload,
                 new SearchDocument
                 {
-                    ["id"] = section.Id,
-                    ["content"] = section.Content,
-                    ["category"] = section.Category,
-                    ["sourcepage"] = section.SourcePage,
-                    ["sourcefile"] = section.SourceFile,
-                    ["embedding"] = embedding,
+                    [DemoConstants.SimpleFields.Id] = section.Id,
+                    [DemoConstants.Semantic.SearchableField] = section.Content,
+                    [DemoConstants.SimpleFields.Category] = section.Category,
+                    [DemoConstants.SimpleFields.SourcePage] = section.SourcePage,
+                    [DemoConstants.SimpleFields.SourceFile] = section.SourceFile,
+                    [DemoConstants.EmbeddingFields.Docs] = embedding,
                 });
     }
 
@@ -140,11 +140,11 @@ internal static class AzureDataAnalysisExtension
                 IndexActionType.MergeOrUpload,
                 new SearchDocument
                 {
-                    ["id"] = section.Id,
-                    ["content"] = section.Content,
-                    ["category"] = section.Category,
-                    ["sourcefile"] = section.SourceFile,
-                    ["imageEmbedding"] = embedding,
+                    [DemoConstants.SimpleFields.Id] = section.Id,
+                    [DemoConstants.Semantic.SearchableField] = section.Content,
+                    [DemoConstants.SimpleFields.Category] = section.Category,
+                    [DemoConstants.SimpleFields.SourceFile] = section.SourceFile,
+                    [DemoConstants.EmbeddingFields.Images] = embedding,
                 });
     }
 

@@ -51,7 +51,7 @@ public class AzureSearchService(SearchClient searchClient) : ISearchService
     #region Privates
     private static void TryProcessDoc(ref List<SupportingContentRecord> sb, SearchResult<SearchDocument> doc, bool useSemanticCaptions)
     {
-        doc.Document.TryGetValue("sourcepage", out var sourcePageValue);
+        doc.Document.TryGetValue(DemoConstants.SimpleFields.SourcePage, out var sourcePageValue);
         string? contentValue;
         try
         {
@@ -62,7 +62,7 @@ public class AzureSearchService(SearchClient searchClient) : ISearchService
             }
             else
             {
-                doc.Document.TryGetValue("content", out var value);
+                doc.Document.TryGetValue(DemoConstants.Semantic.SearchableField, out var value);
                 contentValue = (string)value;
             }
         }
@@ -80,14 +80,14 @@ public class AzureSearchService(SearchClient searchClient) : ISearchService
 
     private static void TryProcessImage(ref List<SupportingImageRecord> sb, SearchResult<SearchDocument> doc)
     {
-        doc.Document.TryGetValue("sourcefile", out var sourceFileValue);
-        doc.Document.TryGetValue("imageEmbedding", out var imageEmbeddingValue);
-        doc.Document.TryGetValue("category", out var categoryValue);
-        doc.Document.TryGetValue("content", out var imageName);
+        doc.Document.TryGetValue(DemoConstants.SimpleFields.SourceFile, out var sourceFileValue);
+        doc.Document.TryGetValue(DemoConstants.EmbeddingFields.Images, out var imageEmbeddingValue);
+        doc.Document.TryGetValue(DemoConstants.SimpleFields.Category, out var categoryValue);
+        doc.Document.TryGetValue(DemoConstants.Semantic.SearchableField, out var imageName);
         if (sourceFileValue is string url &&
             imageName is string name &&
             categoryValue is string category &&
-            category == "image")
+            category == DemoConstants.Category.Images)
         {
             sb.Add(new SupportingImageRecord(name, url));
         }
