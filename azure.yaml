@@ -11,6 +11,8 @@ services:
     docker:
       path: ../Dockerfile
       context: ../
+      buildArgs: 
+        - --no-cache
   func-embedding:
     project: ./app/functions/EmbedFunctions
     host: function
