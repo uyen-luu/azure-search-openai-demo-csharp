@@ -1,20 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Azure.AI.OpenAI;
 using Azure.Identity;
 using Azure.Search.Documents;
-using Azure.Search.Documents.Models;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MinimalApi.Services;
 using NSubstitute;
 using Shared.Models;
+using Shared.Services;
 
 namespace MinimalApi.Tests;
 public class ReadRetrieveReadChatServiceTest
@@ -46,7 +40,7 @@ public class ReadRetrieveReadChatServiceTest
         configuration["AzureStorageContainer"].Returns("northwindhealth");
         configuration["UseAOAI"].Returns("true");
 
-        var chatService = new ReadRetrieveReadChatService(documentSearchService, openAIClient, configuration);
+        var chatService = new RagOchestratorService(documentSearchService, openAIClient, configuration);
 
         var history = new ChatMessage[]
         {
@@ -85,7 +79,7 @@ public class ReadRetrieveReadChatServiceTest
         var azureSearchIndex = Environment.GetEnvironmentVariable("AZURE_SEARCH_INDEX") ?? throw new InvalidOperationException();
         var azureCredential = new DefaultAzureCredential();
         var azureSearchService = new AzureSearchService(new SearchClient(new Uri(azureSearchServiceEndpoint), azureSearchIndex, azureCredential));
-        
+
         var openAIAPIKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new InvalidOperationException();
         var openAIClient = new OpenAIClient(openAIAPIKey);
 
@@ -100,7 +94,7 @@ public class ReadRetrieveReadChatServiceTest
         configuration["AzureStorageAccountEndpoint"].Returns("https://northwindhealth.blob.core.windows.net/");
         configuration["AzureStorageContainer"].Returns("northwindhealth");
 
-        var chatService = new ReadRetrieveReadChatService(
+        var chatService = new RagOchestratorService(
             azureSearchService,
             openAIClient,
             configuration,

@@ -40,7 +40,7 @@ var searchIdentityProvider = (sku.name == 'free') ? null : {
   type: 'SystemAssigned'
 }
 
-resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
+resource search 'Microsoft.Search/searchServices@2024-06-01-preview' = {
   name: name
   location: location
   tags: tags

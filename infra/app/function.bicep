@@ -8,11 +8,11 @@ param appServicePlanId string
 @secure()
 param appSettings object = {}
 param keyVaultName string
-param serviceName string = 'function'
+param serviceName string = 'func-embedding'
 param storageAccountName string
 
 module function '../core/host/functions.bicep' = {
-  name: '${serviceName}-function'
+  name: '${serviceName}-host'
   params: {
     name: name
     location: location

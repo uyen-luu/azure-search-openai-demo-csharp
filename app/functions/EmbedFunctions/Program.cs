@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Azure.AI.OpenAI;
+using Shared.Services;
 
 var host = new HostBuilder()
     .ConfigureServices(services =>
