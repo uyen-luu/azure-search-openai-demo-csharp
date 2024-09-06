@@ -102,7 +102,7 @@
       "value": "${AZURE_OPENAI_CHATGPT_MODEL_NAME=gpt-4o}"
     },
     "chatGptDeploymentCapacity": {
-      "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT_CAPACITY=8}"
+      "value": "${AZURE_OPENAI_CHATGPT_DEPLOYMENT_CAPACITY=30}"
     }
   }
 }

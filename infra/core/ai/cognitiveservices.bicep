@@ -35,7 +35,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' = {
     customSubDomainName: customSubDomainName
     publicNetworkAccess: publicNetworkAccess
     networkAcls: networkAcls
-    disableLocalAuth: true
+    disableLocalAuth: false
   }
   sku: sku
 }
