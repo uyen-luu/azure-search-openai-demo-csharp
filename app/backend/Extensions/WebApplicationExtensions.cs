@@ -119,7 +119,7 @@ internal static class WebApplicationExtensions
 
                 var metadata = blob.Metadata;
                 var documentProcessingStatus = BlobExtension.GetMetadataEnumOrDefault<DocumentProcessingStatus>(
-                    metadata, nameof(DocumentProcessingStatus), DocumentProcessingStatus.NotProcessed);
+                    metadata, nameof(DocumentProcessingStatus), DocumentProcessingStatus.Processing);
                 var embeddingType = BlobExtension.GetMetadataEnumOrDefault<EmbeddingType>(
                     metadata, nameof(EmbeddingType), EmbeddingType.AzureSearch);
 

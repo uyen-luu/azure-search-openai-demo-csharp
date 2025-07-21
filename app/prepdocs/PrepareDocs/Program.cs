@@ -176,7 +176,7 @@ static async ValueTask UploadBlobsAndCreateIndexAsync(
             }
 
             var tempFileName = Path.GetTempFileName();
-            var status = DocumentProcessingStatus.NotProcessed;
+            var status = DocumentProcessingStatus.Processing;
             try
             {
                 using var document = new PdfDocument();
@@ -244,7 +244,7 @@ static async Task<string> UploadBlobAsync(string fileName, string blobName, Blob
 
     await using var fileStream = File.OpenRead(fileName);
     await blobClient.UploadAsync(fileStream, blobHttpHeaders);
-    var status = DocumentProcessingStatus.NotProcessed;
+    var status = DocumentProcessingStatus.Processing;
     try
     {
         await startEmbbeding(url).ConfigureAwait(false);

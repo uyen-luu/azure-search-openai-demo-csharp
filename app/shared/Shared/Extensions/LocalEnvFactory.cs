@@ -2,9 +2,9 @@
 
 using System.Text.RegularExpressions;
 
-namespace MinimalApi.Extensions;
+namespace Shared.Extensions;
 
-internal static class LocalEnvFactory
+public static class LocalEnvFactory
 {
     public static async Task LoadAsync(string filePath, CancellationToken ct = default)
     {

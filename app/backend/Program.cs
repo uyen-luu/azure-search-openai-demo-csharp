@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Microsoft.AspNetCore.Antiforgery;
+using Shared.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 #if DEBUG

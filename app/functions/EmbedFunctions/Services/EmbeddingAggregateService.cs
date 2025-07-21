@@ -19,13 +19,13 @@ public sealed class EmbeddingAggregateService(
         var props = await blobClient.GetPropertiesAsync().ConfigureAwait(false);
         var metadata = props.Value.Metadata;
         var currentStatus = BlobExtension.GetMetadataEnumOrDefault<DocumentProcessingStatus>(
-                   metadata, nameof(DocumentProcessingStatus), DocumentProcessingStatus.NotProcessed);
+                   metadata, nameof(DocumentProcessingStatus), DocumentProcessingStatus.Default);
 
         if (currentStatus == DocumentProcessingStatus.Succeeded)
         {
             return;
         }
-        var status = DocumentProcessingStatus.NotProcessed;
+        var processingStatus = DocumentProcessingStatus.Processing;
         try
         {
             var embedService = embedServiceFactory.GetEmbedService(embeddingType);
@@ -35,7 +35,7 @@ public sealed class EmbeddingAggregateService(
                 logger.LogInformation("Embedding image: {Name}", blobName);
 
                 var result = await embedService.EmbedImageBlobAsync(blobStream, uri, blobName);
-                status = result switch
+                processingStatus = result switch
                 {
                     true => DocumentProcessingStatus.Succeeded,
                     _ => DocumentProcessingStatus.Failed
@@ -47,7 +47,7 @@ public sealed class EmbeddingAggregateService(
                 logger.LogInformation("Embedding pdf: {Name}", blobName);
                 var result = await embedService.EmbedPdfBlobAsync(blobStream, blobName);
 
-                status = result switch
+                processingStatus = result switch
                 {
                     true => DocumentProcessingStatus.Succeeded,
                     _ => DocumentProcessingStatus.Failed
@@ -61,16 +61,16 @@ public sealed class EmbeddingAggregateService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to embed: {Name}, error: {Message}", blobName, ex.Message);
-            status = DocumentProcessingStatus.Failed;
+            processingStatus = DocumentProcessingStatus.Failed;
             throw;
         }
         finally
         {
-            if (currentStatus != status)
+            if (currentStatus != processingStatus)
             {
                 await blobClient.SetMetadataAsync(new Dictionary<string, string>
                 {
-                    [nameof(DocumentProcessingStatus)] = status.ToString(),
+                    [nameof(DocumentProcessingStatus)] = processingStatus.ToString(),
                     [nameof(EmbeddingType)] = embeddingType.ToString()
                 });
             }
