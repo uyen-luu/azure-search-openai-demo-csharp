@@ -44,7 +44,7 @@ param use32BitWorkerProcess bool = false
 param healthCheckPath string = ''
 
 module functions 'appservice.bicep' = {
-  name: '${name}-functions'
+  name: '${name}-appservice'
   params: {
     name: name
     location: location

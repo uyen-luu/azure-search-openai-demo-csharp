@@ -3,10 +3,14 @@
 using Microsoft.AspNetCore.Antiforgery;
 
 var builder = WebApplication.CreateBuilder(args);
-
+#if DEBUG
+await LocalEnvFactory.LoadAsync(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+#endif
 builder.Configuration.ConfigureAzureKeyVault();
 
 // See: https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddOutputCache();
@@ -52,7 +56,7 @@ else
             """;
         options.InstanceName = "content";
 
-        
+
     });
 
     // set application telemetry
@@ -84,6 +88,7 @@ app.UseRouting();
 app.UseStaticFiles();
 app.UseCors();
 app.UseBlazorFrameworkFiles();
+app.UseExceptionHandler();
 app.UseAntiforgery();
 app.MapRazorPages();
 app.MapControllers();

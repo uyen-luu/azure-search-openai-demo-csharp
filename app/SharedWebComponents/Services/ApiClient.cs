@@ -121,9 +121,15 @@ public sealed class ApiClient(HttpClient httpClient)
         }
         else
         {
+            var error = await response.Content.ReadFromJsonAsync<ProblemDetails>();
             var errorTitle = $"HTTP {(int)response.StatusCode} : {response.ReasonPhrase ?? "☹️ Unknown error..."}";
+            if (error is not null)
+            {
+                errorTitle = $"HTTP {(int)response.StatusCode} : {error.Detail}";
+            }
+
             var answer = new ChatAppResponseOrError(
-                Array.Empty<ResponseChoice>(),
+                [],
                 errorTitle);
 
             return result with

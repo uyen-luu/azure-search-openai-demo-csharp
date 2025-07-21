@@ -1,4 +1,8 @@
-﻿using Shared.Models;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
+using Shared.Models;
+
+namespace Shared.Services;
 
 public interface ISearchService
 {

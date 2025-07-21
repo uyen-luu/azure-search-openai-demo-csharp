@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using Azure.Core;
 using Azure.Identity;
 using FluentAssertions;
-using MinimalApi.Services;
-using NSubstitute;
+using Shared.Services;
 
 namespace MinimalApi.Tests;
 
