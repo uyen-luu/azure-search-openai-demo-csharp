@@ -14,7 +14,7 @@ param containerCpuCoreCount string = '0.5'
 
 @description('The maximum number of replicas to run. Must be at least 1.')
 @minValue(1)
-param containerMaxReplicas int = 10
+param containerMaxReplicas int = 2
 
 @description('Memory allocated to a single container instance, e.g., 1Gi')
 param containerMemory string = '1.0Gi'
