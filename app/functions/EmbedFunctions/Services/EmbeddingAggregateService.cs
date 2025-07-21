@@ -18,8 +18,9 @@ public sealed class EmbeddingAggregateService(
         var uri = blobClient.Uri.AbsoluteUri ?? throw new InvalidOperationException("Blob URI is null.");
         var props = await blobClient.GetPropertiesAsync().ConfigureAwait(false);
         var metadata = props.Value.Metadata;
-        var currentStatus = BlobExtension.GetMetadataEnumOrDefault<DocumentProcessingStatus>(
-                   metadata, nameof(DocumentProcessingStatus), DocumentProcessingStatus.Default);
+        var currentStatus = BlobExtension.GetMetadataEnumOrDefault<DocumentProcessingStatus>(metadata,
+                                                                                             nameof(DocumentProcessingStatus),
+                                                                                             DocumentProcessingStatus.Default);
 
         if (currentStatus == DocumentProcessingStatus.Succeeded)
         {
