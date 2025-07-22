@@ -26,6 +26,7 @@ public sealed class EmbeddingAggregateService(
             return;
         }
         var processingStatus = DocumentProcessingStatus.Processing;
+        string? errorMessage = null;
         try
         {
             var embedService = embedServiceFactory.GetEmbedService(embeddingType);
@@ -62,17 +63,23 @@ public sealed class EmbeddingAggregateService(
         {
             logger.LogError(ex, "Failed to embed: {Name}, error: {Message}", blobName, ex.Message);
             processingStatus = DocumentProcessingStatus.Failed;
+            errorMessage = ex.Message;
             throw;
         }
         finally
         {
             if (currentStatus != processingStatus)
             {
-                await blobClient.SetMetadataAsync(new Dictionary<string, string>
+                metadata = new Dictionary<string, string>
                 {
                     [nameof(DocumentProcessingStatus)] = processingStatus.ToString(),
                     [nameof(EmbeddingType)] = embeddingType.ToString()
-                });
+                };
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    metadata.Add("ErrorMessage", errorMessage);
+                }
+                await blobClient.SetMetadataAsync(metadata);
             }
         }
     }
