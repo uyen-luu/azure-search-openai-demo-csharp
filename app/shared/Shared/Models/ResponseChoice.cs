@@ -11,7 +11,7 @@ public record SupportingImageRecord(string Title, string Url);
 
 public record DataPoints(
     [property: JsonPropertyName("text")] string[] Text)
-{}
+{ }
 
 public record Thoughts(
     [property: JsonPropertyName("title")] string Title,
@@ -29,6 +29,7 @@ public record ResponseContext(
     public DataPoints DataPoints { get => new DataPoints(DataPointsContent?.Select(x => $"{x.Title}: {x.Content}").ToArray() ?? Array.Empty<string>()); }
 
     public string ThoughtsString { get => string.Join("\n", Thoughts.Select(x => $"{x.Title}: {x.Description}")); }
+    public static ResponseContext Empty() => new(null, null, [], []);
 }
 
 

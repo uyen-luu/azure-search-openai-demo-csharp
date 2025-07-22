@@ -12,7 +12,14 @@ param storageAccountName string
 
 // Runtime Properties
 @allowed([
-  'dotnet', 'dotnetcore', 'dotnet-isolated', 'node', 'python', 'java', 'powershell', 'custom'
+  'dotnet'
+  'dotnetcore'
+  'dotnet-isolated'
+  'node'
+  'python'
+  'java'
+  'powershell'
+  'custom'
 ])
 param runtimeName string
 param runtimeNameAndVersion string = '${runtimeName}|${runtimeVersion}'
@@ -20,7 +27,10 @@ param runtimeVersion string
 
 // Function Settings
 @allowed([
-  '~4', '~3', '~2', '~1'
+  '~4'
+  '~3'
+  '~2'
+  '~1'
 ])
 param extensionVersion string = '~4'
 
@@ -44,7 +54,7 @@ param use32BitWorkerProcess bool = false
 param healthCheckPath string = ''
 
 module functions 'appservice.bicep' = {
-  name: '${name}-functions'
+  name: '${name}-appservice'
   params: {
     name: name
     location: location
@@ -55,10 +65,12 @@ module functions 'appservice.bicep' = {
     applicationInsightsName: applicationInsightsName
     appServicePlanId: appServicePlanId
     appSettings: union(appSettings, {
-        AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
-        FUNCTIONS_EXTENSION_VERSION: extensionVersion
-        FUNCTIONS_WORKER_RUNTIME: runtimeName
-      })
+      AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+      FUNCTIONS_EXTENSION_VERSION: extensionVersion
+      FUNCTIONS_WORKER_RUNTIME: runtimeName
+      WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+      WEBSITE_CONTENTSHARE: toLower(name)
+    })
     clientAffinityEnabled: clientAffinityEnabled
     enableOryxBuild: enableOryxBuild
     functionAppScaleLimit: functionAppScaleLimit

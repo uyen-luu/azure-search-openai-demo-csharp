@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+namespace Shared.Services;
 public interface IComputerVisionService
 {
     public int Dimension { get; }

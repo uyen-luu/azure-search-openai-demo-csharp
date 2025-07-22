@@ -1,16 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Azure.AI.OpenAI;
 using Azure.Identity;
 using Azure.Search.Documents;
 using FluentAssertions;
-using MinimalApi.Services;
 using Shared.Models;
+using Shared.Services;
 
 namespace MinimalApi.Tests;
 public class AzureDocumentSearchServiceTest

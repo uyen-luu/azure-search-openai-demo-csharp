@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using Shared.Services;
+
 namespace MinimalApi.Extensions;
 
 internal static class ServiceCollectionExtensions
@@ -76,7 +78,7 @@ internal static class ServiceCollectionExtensions
         });
 
         services.AddSingleton<AzureBlobStorageService>();
-        services.AddSingleton<ReadRetrieveReadChatService>(sp =>
+        services.AddSingleton<RagOchestratorService>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
             var useVision = config["UseVision"] == "true";
@@ -87,13 +89,13 @@ internal static class ServiceCollectionExtensions
                 var azureComputerVisionServiceEndpoint = config["AzureComputerVisionServiceEndpoint"];
                 ArgumentNullException.ThrowIfNullOrEmpty(azureComputerVisionServiceEndpoint);
                 var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
-                
+
                 var visionService = new AzureComputerVisionService(httpClient, azureComputerVisionServiceEndpoint, s_azureCredential);
-                return new ReadRetrieveReadChatService(searchClient, openAIClient, config, visionService, s_azureCredential);
+                return new RagOchestratorService(searchClient, openAIClient, config, visionService, s_azureCredential);
             }
             else
             {
-                return new ReadRetrieveReadChatService(searchClient, openAIClient, config, tokenCredential: s_azureCredential);
+                return new RagOchestratorService(searchClient, openAIClient, config, tokenCredential: s_azureCredential);
             }
         });
 

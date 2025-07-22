@@ -1,7 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Azure.AI.OpenAI;
-
+using Shared.Extensions;
+using Shared.Services;
+#if DEBUG
+await LocalEnvFactory.LoadAsync(Path.Combine(Directory.GetCurrentDirectory(), ".env"));
+#endif
 var host = new HostBuilder()
     .ConfigureServices(services =>
     {

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Diagnostics;
+using Shared;
+using Shared.Models;
+using Shared.Services;
 
 s_rootCommand.SetHandler(
     async (context) =>
@@ -174,7 +176,7 @@ static async ValueTask UploadBlobsAndCreateIndexAsync(
             }
 
             var tempFileName = Path.GetTempFileName();
-
+            var status = DocumentProcessingStatus.Processing;
             try
             {
                 using var document = new PdfDocument();
@@ -190,11 +192,21 @@ static async ValueTask UploadBlobsAndCreateIndexAsync(
                 // revert stream position
                 stream.Position = 0;
 
-                await embeddingService.EmbedPDFBlobAsync(stream, documentName);
+                await embeddingService.EmbedPdfBlobAsync(stream, documentName);
+                status = DocumentProcessingStatus.Succeeded;
+            }
+            catch
+            {
+                status = DocumentProcessingStatus.Failed;
             }
             finally
             {
                 File.Delete(tempFileName);
+                await blobClient.SetMetadataAsync(new Dictionary<string, string>
+                {
+                    [nameof(DocumentProcessingStatus)] = status.ToString(),
+                    [nameof(EmbeddingType)] = EmbeddingType.AzureSearch.ToString(),
+                });
             }
         }
     }
@@ -206,18 +218,16 @@ static async ValueTask UploadBlobsAndCreateIndexAsync(
         using var stream = File.OpenRead(fileName);
         var blobName = BlobNameFromFilePage(fileName);
         var imageName = Path.GetFileNameWithoutExtension(blobName);
-        var url = await UploadBlobAsync(fileName, blobName, container);
-        await embeddingService.EmbedImageBlobAsync(stream, url, imageName);
+        var url = await UploadBlobAsync(fileName, blobName, container, url => embeddingService.EmbedImageBlobAsync(stream, url, imageName));
     }
     else
     {
         var blobName = BlobNameFromFilePage(fileName);
-        await UploadBlobAsync(fileName, blobName, container);
-        await embeddingService.EmbedPDFBlobAsync(File.OpenRead(fileName), blobName);
+        await UploadBlobAsync(fileName, blobName, container, url => embeddingService.EmbedPdfBlobAsync(File.OpenRead(fileName), blobName));
     }
 }
 
-static async Task<string> UploadBlobAsync(string fileName, string blobName, BlobContainerClient container)
+static async Task<string> UploadBlobAsync(string fileName, string blobName, BlobContainerClient container, Func<string, Task> startEmbbeding)
 {
     var blobClient = container.GetBlobClient(blobName);
     var url = blobClient.Uri.AbsoluteUri;
@@ -234,7 +244,24 @@ static async Task<string> UploadBlobAsync(string fileName, string blobName, Blob
 
     await using var fileStream = File.OpenRead(fileName);
     await blobClient.UploadAsync(fileStream, blobHttpHeaders);
-
+    var status = DocumentProcessingStatus.Processing;
+    try
+    {
+        await startEmbbeding(url).ConfigureAwait(false);
+        status = DocumentProcessingStatus.Succeeded;
+    }
+    catch (Exception)
+    {
+        status = DocumentProcessingStatus.Failed;
+    }
+    finally
+    {
+        await blobClient.SetMetadataAsync(new Dictionary<string, string>
+        {
+            [nameof(DocumentProcessingStatus)] = status.ToString(),
+            [nameof(EmbeddingType)] = EmbeddingType.AzureSearch.ToString(),
+        });
+    }
 
     return url;
 }

@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using Shared.Services;
+
 namespace EmbedFunctions.Services;
 
 public sealed class EmbedServiceFactory(IEnumerable<IEmbedService> embedServices)

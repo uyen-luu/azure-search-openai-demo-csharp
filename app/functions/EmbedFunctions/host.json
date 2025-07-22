@@ -1,11 +1,20 @@
 {
-    "version": "2.0",
-    "logging": {
-        "applicationInsights": {
-            "samplingSettings": {
-                "isEnabled": true,
-                "excludedTypes": "Request"
-            }
-        }
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      }
     }
+  },
+  "extensions": {
+    "queues": {
+      "maxDequeueCount": 1
+    },
+    "blobs": {
+      "maxDegreeOfParallelism": 4,
+      "poisonBlobThreshold": 1
+    }
+  }
 }

@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-name: azure-search-openai-demo-csharp
+name: copilot
 metadata:
-  template: azure-search-openai-demo-csharp@0.0.3-beta
+  template: copilot@0.0.1-beta
 services:
   web:
     project: ./app/backend/
@@ -11,7 +11,9 @@ services:
     docker:
       path: ../Dockerfile
       context: ../
-  function:
+      buildArgs: 
+        - --no-cache
+  func-embedding:
     project: ./app/functions/EmbedFunctions
     host: function
     language: dotnet
