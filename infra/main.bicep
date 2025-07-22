@@ -580,7 +580,7 @@ module storage 'core/storage/storage-account.bicep' = {
     containers: [
       {
         name: storageContainerName
-        publicAccess: 'None'
+        publicAccess: 'Blob'
       }
     ]
   }
